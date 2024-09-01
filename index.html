@@ -1,5 +1,5 @@
 <html><head><base href="https://webfinance-tracker.com/">
-    <title>Elegant Credit Card Loan Tracker</title>
+    <title>Elegant Credit Card Loan Tracker with Transaction Management</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -136,7 +136,7 @@
             border-radius: 10px;
         }
     
-        .payment-modal {
+        .modal {
             display: none;
             position: fixed;
             z-index: 1;
@@ -189,8 +189,31 @@
             background-color: var(--success-color);
         }
     
+        .edit-btn {
+            background-color: var(--warning-color);
+        }
+    
         .delete-btn {
             background-color: var(--danger-color);
+        }
+    
+        .transactions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+    
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+    
+        .transaction-item:last-child {
+            border-bottom: none;
         }
     
         @media screen and (max-width: 768px) {
@@ -277,7 +300,7 @@
             <button id="loadData"><i class="fas fa-upload"></i> Load Data</button>
         </div>
     
-        <div id="paymentModal" class="payment-modal">
+        <div id="paymentModal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <h2><i class="fas fa-money-bill-wave"></i> Make Payment</h2>
@@ -299,9 +322,36 @@
             </div>
         </div>
     
+        <div id="transactionModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2><i class="fas fa-exchange-alt"></i> Transactions</h2>
+                <div id="transactionsList" class="transactions"></div>
+            </div>
+        </div>
+    
+        <div id="editTransactionModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2><i class="fas fa-edit"></i> Edit Transaction</h2>
+                <form id="editTransactionForm">
+                    <div class="form-group">
+                        <label for="editAmount"><i class="fas fa-dollar-sign"></i> Amount:</label>
+                        <input type="number" id="editAmount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDate"><i class="fas fa-calendar-alt"></i> Date:</label>
+                        <input type="date" id="editDate" required>
+                    </div>
+                    <button type="submit"><i class="fas fa-save"></i> Save Changes</button>
+                </form>
+            </div>
+        </div>
+    
         <script>
             let loans = [];
             let currentLoanIndex = -1;
+            let currentTransactionIndex = -1;
     
             function saveLoan(loan) {
                 loans.push(loan);
@@ -320,23 +370,25 @@
                 let totalBalance = 0;
     
                 loans.forEach((loan, index) => {
-                    const balance = loan.amount - loan.paidAmount;
+                    const paidAmount = loan.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+                    const balance = loan.amount - paidAmount;
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${loan.name}</td>
                         <td>$${loan.amount.toFixed(2)}</td>
                         <td>${loan.installments}</td>
                         <td>${loan.startDate}</td>
-                        <td>$${loan.paidAmount.toFixed(2)}</td>
+                        <td>$${paidAmount.toFixed(2)}</td>
                         <td>$${balance.toFixed(2)}</td>
                         <td class="action-buttons">
                             <button class="pay-btn" onclick="openPaymentModal(${index})"><i class="fas fa-money-bill"></i></button>
+                            <button class="edit-btn" onclick="openTransactionModal(${index})"><i class="fas fa-list"></i></button>
                             <button class="delete-btn" onclick="deleteLoan(${index})"><i class="fas fa-trash"></i></button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                     totalLoan += loan.amount;
-                    totalPaid += loan.paidAmount;
+                    totalPaid += paidAmount;
                     totalBalance += balance;
                 });
     
@@ -365,18 +417,23 @@
                         paymentAmount = parseFloat((loan.amount / loan.installments).toFixed(2));
                         break;
                     case 'full':
-                        paymentAmount = parseFloat((loan.amount - loan.paidAmount).toFixed(2));
+                        paymentAmount = parseFloat((loan.amount - loan.transactions.reduce((sum, transaction) => sum + transaction.amount, 0)).toFixed(2));
                         break;
                     case 'custom':
                         paymentAmount = parseFloat(customAmount);
                         break;
                 }
     
-                if (loan.paidAmount + paymentAmount > loan.amount) {
-                    paymentAmount = parseFloat((loan.amount - loan.paidAmount).toFixed(2));
+                const paidAmount = loan.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+                if (paidAmount + paymentAmount > loan.amount) {
+                    paymentAmount = parseFloat((loan.amount - paidAmount).toFixed(2));
                 }
     
-                loan.paidAmount = parseFloat((loan.paidAmount + paymentAmount).toFixed(2));
+                loan.transactions.push({
+                    amount: paymentAmount,
+                    date: new Date().toISOString().split('T')[0]
+                });
+    
                 updateLocalStorage();
                 updateTable();
                 closePaymentModal();
@@ -387,6 +444,53 @@
                     loans.splice(index, 1);
                     updateLocalStorage();
                     updateTable();
+                }
+            }
+    
+            function openTransactionModal(index) {
+                currentLoanIndex = index;
+                const loan = loans[currentLoanIndex];
+                const transactionsList = document.getElementById('transactionsList');
+                transactionsList.innerHTML = '';
+    
+                loan.transactions.forEach((transaction, tIndex) => {
+                    const transactionItem = document.createElement('div');
+                    transactionItem.className = 'transaction-item';
+                    transactionItem.innerHTML = `
+                        <span>$${transaction.amount.toFixed(2)} on ${transaction.date}</span>
+                        <div>
+                            <button onclick="editTransaction(${tIndex})"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteTransaction(${tIndex})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    transactionsList.appendChild(transactionItem);
+                });
+    
+                document.getElementById('transactionModal').style.display = 'block';
+            }
+    
+            function closeTransactionModal() {
+                document.getElementById('transactionModal').style.display = 'none';
+            }
+    
+            function editTransaction(tIndex) {
+                currentTransactionIndex = tIndex;
+                const transaction = loans[currentLoanIndex].transactions[tIndex];
+                document.getElementById('editAmount').value = transaction.amount;
+                document.getElementById('editDate').value = transaction.date;
+                document.getElementById('editTransactionModal').style.display = 'block';
+            }
+    
+            function closeEditTransactionModal() {
+                document.getElementById('editTransactionModal').style.display = 'none';
+            }
+    
+            function deleteTransaction(tIndex) {
+                if (confirm('Are you sure you want to delete this transaction?')) {
+                    loans[currentLoanIndex].transactions.splice(tIndex, 1);
+                    updateLocalStorage();
+                    updateTable();
+                    openTransactionModal(currentLoanIndex);
                 }
             }
     
@@ -402,7 +506,7 @@
                     amount,
                     installments,
                     startDate,
-                    paidAmount: 0
+                    transactions: []
                 });
     
                 updateTable();
@@ -421,11 +525,27 @@
                     this.value === 'custom' ? 'block' : 'none';
             });
     
-            document.querySelector('.close').addEventListener('click', closePaymentModal);
+            document.getElementById('editTransactionForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const amount = parseFloat(document.getElementById('editAmount').value);
+                const date = document.getElementById('editDate').value;
+    
+                loans[currentLoanIndex].transactions[currentTransactionIndex] = { amount, date };
+                updateLocalStorage();
+                updateTable();
+                closeEditTransactionModal();
+                openTransactionModal(currentLoanIndex);
+            });
+    
+            document.querySelectorAll('.close').forEach(closeBtn => {
+                closeBtn.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
     
             window.onclick = function(event) {
-                if (event.target == document.getElementById('paymentModal')) {
-                    closePaymentModal();
+                if (event.target.className === 'modal') {
+                    event.target.style.display = 'none';
                 }
             }
     
