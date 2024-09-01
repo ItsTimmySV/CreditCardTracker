@@ -1,0 +1,477 @@
+<html><head><base href="https://webfinance-tracker.com/">
+    <title>Elegant Credit Card Loan Tracker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --background-color: #f0f3f7;
+            --text-color: #2d3436;
+            --border-color: #dfe6e9;
+            --success-color: #00b894;
+            --warning-color: #fdcb6e;
+            --danger-color: #d63031;
+        }
+    
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+    
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+    
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+    
+        h1, h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+    
+        .form-group {
+            margin-bottom: 25px;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+    
+        input[type="text"], input[type="number"], input[type="date"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+    
+        input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+    
+        button {
+            display: inline-block;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+    
+        button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            margin-top: 30px;
+        }
+    
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid var(--border-color);
+        }
+    
+        th {
+            background-color: var(--primary-color);
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    
+        tbody tr {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+    
+        tbody tr:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-top: 30px;
+            background-color: var(--secondary-color);
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+        }
+    
+        .payment-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+    
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+    
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+    
+        .close:hover,
+        .close:focus {
+            color: var(--primary-color);
+        }
+    
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+    
+        .action-buttons button {
+            flex: 1;
+            padding: 8px;
+            font-size: 14px;
+        }
+    
+        .pay-btn {
+            background-color: var(--success-color);
+        }
+    
+        .delete-btn {
+            background-color: var(--danger-color);
+        }
+    
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+    
+            input[type="text"], input[type="number"], input[type="date"], select {
+                font-size: 14px;
+            }
+    
+            button {
+                width: 100%;
+                margin-right: 0;
+            }
+    
+            table, th, td {
+                font-size: 14px;
+            }
+    
+            th, td {
+                padding: 10px;
+            }
+    
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+    
+            .summary {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1><i class="fas fa-credit-card"></i> Elegant Credit Card Loan Tracker</h1>
+            <form id="loanForm">
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-user"></i> Borrower Name:</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount"><i class="fas fa-dollar-sign"></i> Loan Amount:</label>
+                    <input type="number" id="amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="installments"><i class="fas fa-list-ol"></i> Number of Installments:</label>
+                    <input type="number" id="installments" required>
+                </div>
+                <div class="form-group">
+                    <label for="startDate"><i class="fas fa-calendar-alt"></i> Start Date:</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <button type="submit"><i class="fas fa-plus"></i> Add Loan</button>
+            </form>
+    
+            <div style="overflow-x: auto;">
+                <table id="loanTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Loan Amount</th>
+                            <th>Installments</th>
+                            <th>Start Date</th>
+                            <th>Paid Amount</th>
+                            <th>Balance</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+    
+            <div class="summary">
+                <div id="totalLoan"></div>
+                <div id="totalPaid"></div>
+                <div id="totalBalance"></div>
+            </div>
+    
+            <button id="saveData"><i class="fas fa-save"></i> Save Data</button>
+            <button id="loadData"><i class="fas fa-upload"></i> Load Data</button>
+        </div>
+    
+        <div id="paymentModal" class="payment-modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2><i class="fas fa-money-bill-wave"></i> Make Payment</h2>
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label for="paymentType"><i class="fas fa-wallet"></i> Payment Type:</label>
+                        <select id="paymentType">
+                            <option value="installment">Installment</option>
+                            <option value="full">Full Amount</option>
+                            <option value="custom">Custom Amount</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="customAmountGroup" style="display:none;">
+                        <label for="customAmount"><i class="fas fa-dollar-sign"></i> Custom Amount:</label>
+                        <input type="number" id="customAmount" step="0.01">
+                    </div>
+                    <button type="submit"><i class="fas fa-check"></i> Confirm Payment</button>
+                </form>
+            </div>
+        </div>
+    
+        <script>
+            let loans = [];
+            let currentLoanIndex = -1;
+    
+            function saveLoan(loan) {
+                loans.push(loan);
+                updateLocalStorage();
+            }
+    
+            function updateLocalStorage() {
+                localStorage.setItem('loans', JSON.stringify(loans));
+            }
+    
+            function updateTable() {
+                const tbody = document.querySelector('#loanTable tbody');
+                tbody.innerHTML = '';
+                let totalLoan = 0;
+                let totalPaid = 0;
+                let totalBalance = 0;
+    
+                loans.forEach((loan, index) => {
+                    const balance = loan.amount - loan.paidAmount;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${loan.name}</td>
+                        <td>$${loan.amount.toFixed(2)}</td>
+                        <td>${loan.installments}</td>
+                        <td>${loan.startDate}</td>
+                        <td>$${loan.paidAmount.toFixed(2)}</td>
+                        <td>$${balance.toFixed(2)}</td>
+                        <td class="action-buttons">
+                            <button class="pay-btn" onclick="openPaymentModal(${index})"><i class="fas fa-money-bill"></i></button>
+                            <button class="delete-btn" onclick="deleteLoan(${index})"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                    totalLoan += loan.amount;
+                    totalPaid += loan.paidAmount;
+                    totalBalance += balance;
+                });
+    
+                document.getElementById('totalLoan').innerHTML = `<i class="fas fa-chart-line"></i> Total Loan: $${totalLoan.toFixed(2)}`;
+                document.getElementById('totalPaid').innerHTML = `<i class="fas fa-hand-holding-usd"></i> Total Paid: $${totalPaid.toFixed(2)}`;
+                document.getElementById('totalBalance').innerHTML = `<i class="fas fa-balance-scale"></i> Total Balance: $${totalBalance.toFixed(2)}`;
+            }
+    
+            function openPaymentModal(index) {
+                currentLoanIndex = index;
+                document.getElementById('paymentModal').style.display = 'block';
+            }
+    
+            function closePaymentModal() {
+                document.getElementById('paymentModal').style.display = 'none';
+                document.getElementById('paymentForm').reset();
+                document.getElementById('customAmountGroup').style.display = 'none';
+            }
+    
+            function makePayment(paymentType, customAmount) {
+                const loan = loans[currentLoanIndex];
+                let paymentAmount = 0;
+    
+                switch(paymentType) {
+                    case 'installment':
+                        paymentAmount = parseFloat((loan.amount / loan.installments).toFixed(2));
+                        break;
+                    case 'full':
+                        paymentAmount = parseFloat((loan.amount - loan.paidAmount).toFixed(2));
+                        break;
+                    case 'custom':
+                        paymentAmount = parseFloat(customAmount);
+                        break;
+                }
+    
+                if (loan.paidAmount + paymentAmount > loan.amount) {
+                    paymentAmount = parseFloat((loan.amount - loan.paidAmount).toFixed(2));
+                }
+    
+                loan.paidAmount = parseFloat((loan.paidAmount + paymentAmount).toFixed(2));
+                updateLocalStorage();
+                updateTable();
+                closePaymentModal();
+            }
+    
+            function deleteLoan(index) {
+                if (confirm('Are you sure you want to delete this loan?')) {
+                    loans.splice(index, 1);
+                    updateLocalStorage();
+                    updateTable();
+                }
+            }
+    
+            document.getElementById('loanForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('name').value;
+                const amount = parseFloat(document.getElementById('amount').value);
+                const installments = parseInt(document.getElementById('installments').value);
+                const startDate = document.getElementById('startDate').value;
+    
+                saveLoan({
+                    name,
+                    amount,
+                    installments,
+                    startDate,
+                    paidAmount: 0
+                });
+    
+                updateTable();
+                this.reset();
+            });
+    
+            document.getElementById('paymentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const paymentType = document.getElementById('paymentType').value;
+                const customAmount = parseFloat(document.getElementById('customAmount').value) || 0;
+                makePayment(paymentType, customAmount);
+            });
+    
+            document.getElementById('paymentType').addEventListener('change', function() {
+                document.getElementById('customAmountGroup').style.display = 
+                    this.value === 'custom' ? 'block' : 'none';
+            });
+    
+            document.querySelector('.close').addEventListener('click', closePaymentModal);
+    
+            window.onclick = function(event) {
+                if (event.target == document.getElementById('paymentModal')) {
+                    closePaymentModal();
+                }
+            }
+    
+            document.getElementById('saveData').addEventListener('click', function() {
+                const data = JSON.stringify(loans);
+                const blob = new Blob([data], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'loan_data.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+    
+            document.getElementById('loadData').addEventListener('click', function() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = function(event) {
+                    const file = event.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            loans = JSON.parse(e.target.result);
+                            updateLocalStorage();
+                            updateTable();
+                        } catch (error) {
+                            console.error('Error parsing JSON:', error);
+                            alert('Invalid file format. Please select a valid JSON file.');
+                        }
+                    };
+                    reader.readAsText(file);
+                };
+                input.click();
+            });
+    
+            // Load data from localStorage on page load
+            window.addEventListener('load', function() {
+                const storedLoans = localStorage.getItem('loans');
+                if (storedLoans) {
+                    loans = JSON.parse(storedLoans);
+                    updateTable();
+                }
+            });
+        </script>
+    </body>
+    </html>
