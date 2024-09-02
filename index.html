@@ -409,35 +409,47 @@
             }
     
             function makePayment(paymentType, customAmount) {
-                const loan = loans[currentLoanIndex];
-                let paymentAmount = 0;
-    
-                switch(paymentType) {
-                    case 'installment':
-                        paymentAmount = parseFloat((loan.amount / loan.installments).toFixed(2));
-                        break;
-                    case 'full':
-                        paymentAmount = parseFloat((loan.amount - loan.transactions.reduce((sum, transaction) => sum + transaction.amount, 0)).toFixed(2));
-                        break;
-                    case 'custom':
-                        paymentAmount = parseFloat(customAmount);
-                        break;
-                }
-    
-                const paidAmount = loan.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
-                if (paidAmount + paymentAmount > loan.amount) {
-                    paymentAmount = parseFloat((loan.amount - paidAmount).toFixed(2));
-                }
-    
-                loan.transactions.push({
-                    amount: paymentAmount,
-                    date: new Date().toISOString().split('T')[0]
-                });
-    
-                updateLocalStorage();
-                updateTable();
-                closePaymentModal();
-            }
+    const loan = loans[currentLoanIndex];
+    let paymentAmount = 0;
+
+    switch(paymentType) {
+        case 'installment':
+            paymentAmount = parseFloat((loan.amount / loan.installments).toFixed(2));
+            break;
+        case 'full':
+            paymentAmount = parseFloat((loan.amount - loan.transactions.reduce((sum, transaction) => sum + transaction.amount, 0)).toFixed(2));
+            break;
+        case 'custom':
+            paymentAmount = parseFloat(customAmount);
+            break;
+    }
+
+    const paidAmount = loan.transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+    if (paidAmount + paymentAmount > loan.amount) {
+        paymentAmount = parseFloat((loan.amount - paidAmount).toFixed(2));
+    }
+
+    // Disminuir el número de installments
+    if (loan.installments > 0) {
+        loan.installments -= 1;
+    }
+
+    // Verificar si ya se ha pagado todo y detener
+    if (loan.installments <= 0) {
+        alert('El préstamo ha sido completamente pagado.');
+        return;
+    }
+
+    loan.transactions.push({
+        amount: paymentAmount,
+        date: new Date().toISOString().split('T')[0]
+    });
+
+    updateLocalStorage();
+    updateTable();
+    closePaymentModal();
+}
+
     
             function deleteLoan(index) {
                 if (confirm('Are you sure you want to delete this loan?')) {
